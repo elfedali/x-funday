@@ -1,0 +1,78 @@
+<div class="row">
+  <aside class="col-md-3">
+    <div class="box bg-slate-100 h-screen">
+      <h1>Welcome, <%= user.username %>!</h1>
+      <p>Your email is: <%= user.email %></p>
+      <div id="welcomeMessage"></div>
+      <!-- /#welcomeMessage -->
+      <div>
+        <!-- logout -->
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+  </aside>
+  <div class="col-md-9">
+    <div class="h-screen overflow-y-auto">
+      <ul id="messages"></ul>
+      <form action="" id="form">
+        <div class="input-group mb-3">
+          <input
+            type="text"
+            id="input"
+            class="form-control"
+            autocomplete="off"
+          />
+          <button class="btn btn-outline-secondary" type="submit">
+            Send Message
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- /.conainer-fluid -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io({
+    auth: {
+      serverOffset: 0,
+    },
+  });
+
+  const form = document.getElementById("form");
+  const input = document.getElementById("input");
+  const messages = document.getElementById("messages");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (input.value) {
+      socket.emit("chat message", input.value);
+      form.reset();
+    }
+  });
+  let currentUser; // Variable to store the current user  information
+  // listen for the  event  "user" event to get the current user information
+  socket.on("user", (user) => {
+    currentUser = user;
+    document.getElementById(
+      "welcomeMessage"
+    ).textContent = `Welcome, ${user.username}!`;
+  });
+
+  // listen for the  event  "chat message"
+  socket.on("chat message", (messageData, serverOffset) => {
+    console.log(messageData);
+    const item = document.createElement("li");
+    const usernameSpan = document.createElement("span");
+    usernameSpan.classList.add("username"); // Optional class for styling
+    usernameSpan.textContent = `[${messageData.username}] `;
+    const messageSpan = document.createElement("span");
+    messageSpan.textContent = messageData.content;
+    item.appendChild(usernameSpan);
+    item.appendChild(messageSpan);
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+    socket.auth.serverOffset = serverOffset;
+  });
+</script>

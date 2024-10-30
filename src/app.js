@@ -4,15 +4,18 @@ import { fileURLToPath } from "node:url";
 import bodyParser from "body-parser";
 import passport from "passport";
 import { sessionMiddleware } from "./middlewares/session.js";
-import authRoutes from "./routes/authRoutes.js";
-import indexRoutes from "./routes/indexRoutes.js";
+import authRoutes from "./routes/auth.routes.js";
+import indexRoutes from "./routes/index.routes.js";
 import "./config/passport.js"; // Passport configuration
+import expressLayouts from "express-ejs-layouts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 app.set("view engine", "ejs");
-app.set("views", join(__dirname, "../views"));
+app.use(expressLayouts);
+app.set("layout", "layouts/default");
+app.set("views", join(__dirname, "../templates"));
 app.use(express.static(join(__dirname, "../public")));
 
 app.use(bodyParser.urlencoded({ extended: true }));

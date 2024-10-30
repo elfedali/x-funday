@@ -1,0 +1,66 @@
+<main class="grid grid-cols-5">
+  <section
+    class="col-span-3 h-screen items-center justify-center bg-slate-100 hidden md:block"
+  >
+    <img
+      src="/assets/images/pexels-tima-miroshnichenko-5439146.jpg"
+      alt=""
+      class="object-cover h-full w-full"
+    />
+  </section>
+  <section class="col-span-2 h-screen p-10">
+    <h1 class="text-4xl font-extrabold dark:text-white">
+      Create an account at <u>ProChat</u>
+    </h1>
+    <p class="text-gray-500 text-lg font-light mb-4">
+      Already have an account? <a href="/login"><u>Login</u></a>
+    </p>
+    <!-- register.html -->
+    <form action="/register" method="post">
+      <div class="mb-4">
+        <label class="mb-3 text-gray-500" for="username">Username</label>
+        <input
+          type="text"
+          name="username"
+          class="p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 w-full"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label class="mb-3 text-gray-500" for="email">E-mail</label>
+        <input
+          type="email"
+          name="email"
+          class="p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 w-full"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label class="mb-3 text-gray-500" for="password">Password</label>
+        <input
+          type="password"
+          name="password"
+          class="p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 w-full"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label class="mb-3 text-gray-500" for="username-confirmation"
+          >Password confirmation</label
+        >
+        <input
+          type="password"
+          name="confirmPassword"
+          class="p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 w-full"
+          required
+        />
+      </div>
+      <button
+        type="submit"
+        class="px-5 py-2 bg-green-800 text-white rounded hover:bg-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+      >
+        Register
+      </button>
+    </form>
+  </section>
+</main>

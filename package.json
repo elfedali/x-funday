@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/server.js ",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tailwind": "npx tailwindcss -i ./assets/css/input.css -o ./public/assets/css/styles.css --watch",
+    "browser-sync": "browser-sync start --proxy \"localhost:3000\" --files \"**/*.*\""
   },
   "keywords": [],
   "author": "abdessamad el fedali",
@@ -19,7 +21,9 @@
     "dotenv": "^16.3.1",
     "ejs": "^3.1.10",
     "express": "^4.18.2",
+    "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.0",
+    "flexboxgrid": "^6.3.1",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "socket.io": "^4.7.2",
@@ -29,6 +33,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "tailwindcss": "^3.4.14"
   }
 }

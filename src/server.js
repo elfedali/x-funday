@@ -8,7 +8,15 @@ import { setupChatSockets } from "./sockets/chat.js";
 dotenv.config();
 
 const server = createHttpServer(app);
-const io = new SocketServer(server);
+const io = new SocketServer(
+  server,
+
+  {
+    cors: {
+      origin: "*",
+    },
+  }
+);
 
 setupChatSockets(io);
 

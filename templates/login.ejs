@@ -1,0 +1,53 @@
+<main class="grid grid-cols-5">
+  <section
+    class="col-span-3 h-screen items-center justify-center bg-slate-100 hidden md:block"
+  >
+    <img
+      src="/assets/images/pexels-tima-miroshnichenko-5439146.jpg"
+      alt=""
+      class="object-cover h-full w-full"
+    />
+  </section>
+  <section class="col-span-2 h-screen p-10">
+    <img src="/assets/icons/logo.svg" alt="" class="w-20 mb-4" />
+    <h1 class="text-4xl font-extrabold dark:text-white">
+      Welcome to <u>ProChat</u>
+    </h1>
+    <p class="text-gray-500 text-lg font-light mb-4">
+      Dont have an account? <a class="underline" href="/register">Register</a>
+    </p>
+    <article>
+      <form action="/login" method="post">
+        <div>
+          <label for="username" class="sr-only">Username</label>
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            required
+            class="p-2 m-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 w-full"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="sr-only">Password</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+            class="p-2 m-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-600 w-full"
+          />
+        </div>
+        <div>
+          <button
+            type="submit"
+            class="px-5 py-2 m-2 bg-green-800 text-white rounded hover:bg-green-600 focus:outline-none focus:ring-1 focus:ring-green-600"
+          >
+            Login
+          </button>
+        </div>
+      </form>
+    </article>
+  </section>
+</main>
