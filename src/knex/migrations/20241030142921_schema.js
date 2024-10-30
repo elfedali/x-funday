@@ -7,14 +7,17 @@ export const up = function (knex) {
     .createTable("users", function (table) {
       table.increments("id");
       table.string("username").unique().index();
+      table.string("name").nullable();
       table.string("email").unique().index();
       table.string("password");
       table.string("avatar").nullable();
       table.string("bio").nullable();
       table.boolean("is_admin").defaultTo(false);
       table.boolean("is_active").defaultTo(true);
+      table.string("verify_token").nullable();
+      table.boolean("is_verified").defaultTo(false);
 
-      table.timestamps();
+      table.timestamps(true, true);
     })
     .createTable("messages", function (table) {
       table.increments("id");
@@ -26,7 +29,7 @@ export const up = function (knex) {
         .onDelete("CASCADE")
         .onUpdate("CASCADE");
 
-      table.timestamps();
+      table.timestamps(true, true);
     })
     .createTable("rooms", function (table) {
       table.increments("id");
@@ -49,7 +52,7 @@ export const up = function (knex) {
         .onDelete("CASCADE")
         .onUpdate("CASCADE");
 
-      table.timestamps();
+      table.timestamps(true, true);
     })
     .createTable("room_messages", function (table) {
       table.increments("id");
@@ -66,7 +69,7 @@ export const up = function (knex) {
         .onDelete("CASCADE")
         .onUpdate("CASCADE");
 
-      table.timestamps();
+      table.timestamps(true, true);
     });
 };
 

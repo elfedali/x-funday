@@ -1,11 +1,12 @@
-import { getUserById } from "../models/userModel.js";
-import { initializeDb } from "../db/init.js";
+import { getUserById } from "../models/user.model.js";
+import knex from "../knex/knex.js";
 import { sessionMiddleware } from "../middlewares/session.js";
 import passport from "passport";
+import { createMessage } from "../models/message.model.js";
 
-const db = await initializeDb();
-
-export function setupChatSockets(io) {
+// const db = await initializeDb();
+const users = new Map();
+export const setupChatSockets = (io) => {
   io.use((socket, next) => {
     sessionMiddleware(socket.request, {}, next);
   });
@@ -26,65 +27,81 @@ export function setupChatSockets(io) {
     }
   });
   io.on("connection", async (socket) => {
+    const sessionID = socket.id;
+    console.log("sessionID", sessionID);
     console.log("a user connected");
 
     // Get the user from the session
     console.log(socket.request.user);
+    // SET THE USER ID AND SOCKET ID IN THE MAP
+    users.set(socket.request.user.id, socket.id);
 
     // Get username from logged-in user
-    socket.emit("user", socket.request.user);
+    //socket.emit("user", socket.request.user);
 
     socket.on("disconnect", () => {
       console.log("user disconnected");
+      users.delete(socket.request.user.id);
     });
 
     socket.on("chat message", async (msg) => {
+      console.log("server message: " + msg);
       const user = await getUserById(socket.request.user.id); // Get username from logged-in user
-
+      if (!user) {
+        return;
+      }
       let result;
-      try {
-        result = await db.run(
-          "INSERT INTO messages (content, user_id) VALUES (?, ?)",
-          msg,
-          socket.request.user.id
-        );
-      } catch (e) {
-        console.log(e);
+
+      await createMessage({
+        content: msg,
+        user_id: socket.request.user.id,
+      }).then((res) => {
+        result = res;
+      });
+
+      io.emit("chat message", {
+        username: user.username,
+        content: msg,
+        id: result[0].id,
+      });
+    });
+
+    socket.on("direct message", async ({ recipientId, message }) => {
+      const user = await getUserById(socket.request.user.id); // Get username from logged-in user
+      if (!user) {
         return;
       }
 
-      const messageData = await db.get(
-        "SELECT * FROM messages WHERE id = ?",
-        result.lastID
-      );
+      console.log("message", message);
+      let recipientSocketId = users.get(Number(recipientId));
 
-      console.log(messageData);
-
-      // Emit the message data object with username and content properties
-      io.emit("chat message", {
-        username: user.username,
-        content: messageData.content,
-        id: messageData.id,
-      });
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit("direct message", {
+          username: user.username,
+          content: message,
+        });
+      }
     });
 
     if (!socket.recovered) {
       // if the connection state recovery was not successful
       try {
-        await db.each(
-          "SELECT messages.id, messages.content, users.username FROM messages JOIN users ON messages.user_id = users.id WHERE messages.id > ? ORDER BY messages.id ASC",
-          [socket.handshake.auth.serverOffset || 0],
-          (_err, row) => {
-            socket.emit("chat message", {
-              username: row.username,
-              content: row.content,
-              id: row.id,
-            });
-          }
-        );
+        const messages = await knex("messages")
+          .join("users", "messages.user_id", "users.id")
+          .select("messages.id", "messages.content", "users.username")
+          .where("messages.id", ">", socket.handshake.auth.serverOffset || 0)
+          .orderBy("messages.id", "asc");
+
+        messages.forEach((row) => {
+          socket.emit("chat message", {
+            username: row.username,
+            content: row.content,
+            id: row.id,
+          });
+        });
       } catch (error) {
         console.log(error);
       }
     }
   });
-}
+};

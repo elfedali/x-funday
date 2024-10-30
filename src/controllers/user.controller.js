@@ -4,7 +4,7 @@ import {
   getUserByUsername,
   getUserById,
   createUser,
-} from "../models/userModel.js";
+} from "../models/user.model.js";
 
 // Handle user registration
 export async function registerUser(req, res) {

@@ -1,5 +1,9 @@
 // Update with your config settings.
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
@@ -10,10 +14,10 @@ export default {
       filename: "./dev.sqlite",
     },
     migrations: {
-      directory: "./migrations",
+      directory: `${__dirname}/src/knex/migrations`,
     },
     seeds: {
-      directory: "./seeds",
+      directory: `${__dirname}/src/knex/seeds`,
     },
   },
 
