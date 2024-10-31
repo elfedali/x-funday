@@ -8,7 +8,7 @@ router.get("/", isAuthenticated, async (req, res) => {
   const user = req.user;
   const users = await getAllUsers();
   res.render("index", {
-    user: user,
+    current_user: user,
     users: users,
     layout: "layouts/default",
     title: "chat",

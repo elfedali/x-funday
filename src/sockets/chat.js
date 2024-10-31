@@ -66,24 +66,58 @@ export const setupChatSockets = (io) => {
       });
     });
 
-    socket.on("direct message", async ({ recipientId, message }) => {
-      const user = await getUserById(socket.request.user.id); // Get username from logged-in user
-      if (!user) {
-        return;
-      }
+    socket.on(
+      "direct message",
+      async ({ recipientId, message, type = "text" }) => {
+        const user = await getUserById(socket.request.user.id); // Get sender details
+        if (!user) return;
 
-      console.log("message", message);
-      let recipientSocketId = users.get(Number(recipientId));
+        // Check if a room exists between sender and recipient
+        let room = await knex("rooms")
+          .join("room_users as ru1", "rooms.id", "ru1.room_id")
+          .join("room_users as ru2", "rooms.id", "ru2.room_id")
+          .where("ru1.user_id", socket.request.user.id)
+          .andWhere("ru2.user_id", recipientId)
+          .first();
 
-      if (recipientSocketId) {
-        io.to(recipientSocketId).emit("direct message", {
-          username: user.username,
+        if (!room) {
+          // If no room, create one
+          const [roomId] = await knex("rooms").insert({
+            name: `Room_${socket.request.user.id}_${recipientId}`,
+          });
+          await knex("room_users").insert([
+            { room_id: roomId, user_id: socket.request.user.id },
+            { room_id: roomId, user_id: recipientId },
+          ]);
+          room = { id: roomId };
+        }
+
+        // Store message in `messages` table and associate it with the room
+        const [messageId] = await knex("messages").insert({
           content: message,
+          user_id: socket.request.user.id,
         });
-      }
-    });
 
-    if (!socket.recovered) {
+        await knex("room_messages").insert({
+          room_id: room.id,
+          message_id: messageId,
+        });
+
+        // Notify recipient of the new message in the room
+        let recipientSocketId = users.get(Number(recipientId));
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit("direct message", {
+            senderId: socket.request.user.id,
+            senderUsername: user.username,
+            roomId: room.id,
+            content: message,
+            type,
+          });
+        }
+      }
+    );
+
+    /* if (!socket.recovered) {
       // if the connection state recovery was not successful
       try {
         const messages = await knex("messages")
@@ -103,5 +137,6 @@ export const setupChatSockets = (io) => {
         console.log(error);
       }
     }
+    */
   });
 };

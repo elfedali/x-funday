@@ -7,7 +7,14 @@
     <link rel="stylesheet" href="/assets/css/styles.css" />
     <script src="//unpkg.com/alpinejs" defer></script>
   </head>
-  <body x-data="{ sidebarOpen: true }">
+  <body
+    x-data="{ 
+      recipientId: undefined, 
+      recipientName: undefined,
+      message: undefined,
+      messages:[] 
+    }"
+  >
     <%- body %>
   </body>
 </html>

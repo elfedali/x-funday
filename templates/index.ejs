@@ -1,10 +1,10 @@
 <div class="grid grid-cols-12">
-  <aside class="col-span-2 _bg-gray-50 border-r">
+  <aside class="col-span-2 border-r h-screen">
     <header class="flex px-2 py-2 bg-white items-center border-b">
       <div class="mr-2 flex-shrink-0">
         <a href="#" class="cursor-pointer flex items-center">
           <img
-            src="https://pipeline.mediumra.re/assets/img/avatar-male-<%= user.id %>.jpg"
+            src="https://pipeline.mediumra.re/assets/img/avatar-male-<%= current_user.id %>.jpg"
             alt=""
             class="w-12 h-12 rounded-full"
           />
@@ -13,10 +13,12 @@
       <div>
         <h1 class="font-medium">
           <a href="#" class="cursor-pointer text-ellipsis"
-            ><%= user.username %></a
+            ><%= current_user.username %></a
           >
         </h1>
-        <p class="text-gray-700 text-sm text-ellipsis"><%= user.email %></p>
+        <p class="text-gray-700 text-sm text-ellipsis">
+          <%= current_user.email %>
+        </p>
       </div>
     </header>
 
@@ -24,14 +26,15 @@
       <!-- logout -->
       <a href="/logout">Logout</a>
       <hr />
-      <% users.forEach((user) => { %>
+      <% users.forEach((user) => { if (current_user.id === user.id) return; %>
       <div
         class="flex items-center p-4 border-b hover:bg-gray-100 cursor-pointer"
-        onclick="setRecipient('<%= user.id %>')"
+        :class="{ 'bg-gray-100': recipientId === <%= user.id %> }"
+        @click="recipientId = <%= user.id %>; recipientName = '<%= user.username %>'"
       >
         <div class="mr-2">
           <img
-            src="https://pipeline.mediumra.re/assets/img/avatar-male-4.jpg"
+            src="https://pipeline.mediumra.re/assets/img/avatar-male-<%= user.id %>.jpg"
             alt=""
             class="w-8 h-8 rounded-full"
           />
@@ -44,23 +47,51 @@
     </div>
   </aside>
   <main class="col-span-10">
-    <div class="flex flex-col h-screen justify-between">
-      <header class="p-4 text-gray-700 bg-green-50">
-        <h1 class="text-2xl font-semibold">Alice</h1>
+    <!-- Empty-->
+    <div
+      class="h-screen flex items-center justify-center"
+      x-show="!recipientId"
+    >
+      <h1 class="text-8xl font-semibold text-gray-100">ProChat</h1>
+    </div>
+    <!-- Chat -->
+    <div class="flex flex-col h-screen justify-between" x-show="recipientId">
+      <header class="p-4 text-gray-700 border-b">
+        <h1 class="text-2xl font-semibold" x-text="recipientName"></h1>
       </header>
       <main class="flex-1 overflow-y-auto p-4">
-        <ul id="messages"></ul>
+        <!-- Messages -->
+        <ul id="messages">
+          <template x-for="msg in messages" :key="msg.id">
+            <li x-text="`${msg.username}: ${msg.content}`"></li>
+          </template>
+        </ul>
       </main>
-      <footer class="bg-green-100 p-4">
-        <form action="" id="form">
-          <div class="input-group mb-3">
+      <footer class="border-t p-4">
+        <form
+          action="#"
+          @submit.prevent="
+              if (message && recipientId) {
+                socket.emit('direct message', { recipientId, message });
+                message = '';
+              } else {
+                console.error('Recipient ID or message is not set');
+              }
+            "
+        >
+          <div class="flex items-center">
             <input
               type="text"
               id="input"
-              class="form-control"
+              class="h-10 px-4 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-green-500 w-full"
               autocomplete="off"
+              placeholder="Type a message"
+              x-model="message"
             />
-            <button class="btn btn-outline-secondary" type="submit">
+            <button
+              class="h-10 px-4 ml-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors flex-shrink-0"
+              type="submit"
+            >
               Send Message
             </button>
           </div>
@@ -70,7 +101,6 @@
   </main>
 </div>
 
-<!-- /.conainer-fluid -->
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io({
@@ -79,37 +109,9 @@
     },
   });
 </script>
-<script>
-  const form = document.getElementById("form");
-  const input = document.getElementById("input");
-  const messages = document.getElementById("messages");
-</script>
-
-<script>
-  var recipientId = null;
-  function setRecipient(id) {
-    recipientId = id;
-    console.log(recipientId);
-  }
-
-  // direct message
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const message = input.value;
-    console.log(message);
-    if (message && recipientId) {
-      socket.emit("direct message", { recipientId, message });
-      form.reset();
-    }
-  });
-</script>
 
 <script>
   socket.on("direct message", (data) => {
     console.log(data);
-    const li = document.createElement("li");
-    li.textContent = data.message;
-    messages.appendChild(li);
   });
 </script>
