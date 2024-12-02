@@ -1,0 +1,29 @@
+@host=http://localhost:3000
+###
+GET {{host}}/
+Content-Type: application/json
+Accept: application/json
+
+
+###
+POST {{host}}/u/r
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username"  : "hello",
+    "email": "hello@mail.ma",
+    "password": "123456",
+    "confirmPassword": "123456"
+}
+
+
+###
+POST {{host}}/u/l
+Content-Type: application/json
+Accept: application/json
+
+{
+    "login"  : "webmaster@prochat.ma",
+    "password": "password"
+}

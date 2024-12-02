@@ -1,4 +1,5 @@
-require("dotenv").config();
+// Usage: import env from './helpers/env.js';
+import "dotenv/config";
 
 export default {
   //app

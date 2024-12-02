@@ -19,6 +19,7 @@ export default {
     seeds: {
       directory: `${__dirname}/src/knex/seeds`,
     },
+    useNullAsDefault: true,
   },
 
   staging: {

@@ -1,17 +1,13 @@
 import { Router } from "express";
-import { isAuthenticated } from "../middlewares/auth.js";
-import { getAllUsers } from "../models/user.model.js";
 
 const router = Router();
 
-router.get("/", isAuthenticated, async (req, res) => {
-  const user = req.user;
-  const users = await getAllUsers();
-  res.render("index", {
-    current_user: user,
-    users: users,
-    layout: "layouts/default",
-    title: "chat",
+router.get("/", async (req, res) => {
+  res.json({
+    message: "Welcome to the chat API",
+    appName: "ProChat API",
+    appVersion: "1.0.0",
+    nodeVersion: process.version,
   });
 });
 

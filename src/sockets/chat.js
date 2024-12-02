@@ -1,22 +1,22 @@
 import { getUserById } from "../models/user.model.js";
 import knex from "../knex/knex.js";
-import { sessionMiddleware } from "../middlewares/session.js";
-import passport from "passport";
+// import { sessionMiddleware } from "../middlewares/session.js";
+// import passport from "passport";
 import { createMessage } from "../models/message.model.js";
 
 // const db = await initializeDb();
 const users = new Map();
 export const setupChatSockets = (io) => {
   io.use((socket, next) => {
-    sessionMiddleware(socket.request, {}, next);
+    // sessionMiddleware(socket.request, {}, next);
   });
 
   io.use((socket, next) => {
-    passport.initialize()(socket.request, {}, next);
+    // passport.initialize()(socket.request, {}, next);
   });
 
   io.use((socket, next) => {
-    passport.session()(socket.request, {}, next);
+    // passport.session()(socket.request, {}, next);
   });
 
   io.use((socket, next) => {
@@ -89,8 +89,14 @@ export const setupChatSockets = (io) => {
             { room_id: roomId, user_id: socket.request.user.id },
             { room_id: roomId, user_id: recipientId },
           ]);
-          room = { id: roomId };
         }
+        // Fetch the room from the database
+        room = await knex("rooms")
+          .join("room_users as ru1", "rooms.id", "ru1.room_id")
+          .join("room_users as ru2", "rooms.id", "ru2.room_id")
+          .where("ru1.user_id", socket.request.user.id)
+          .andWhere("ru2.user_id", recipientId)
+          .first();
 
         // Store message in `messages` table and associate it with the room
         const [messageId] = await knex("messages").insert({
@@ -99,9 +105,14 @@ export const setupChatSockets = (io) => {
         });
 
         await knex("room_messages").insert({
-          room_id: room.id,
+          room_id: room.room_id,
           message_id: messageId,
         });
+
+        // Fetch the message from the database
+        const storedMessage = await knex("messages")
+          .where({ id: messageId })
+          .first();
 
         // Notify recipient of the new message in the room
         let recipientSocketId = users.get(Number(recipientId));
@@ -110,7 +121,8 @@ export const setupChatSockets = (io) => {
             senderId: socket.request.user.id,
             senderUsername: user.username,
             roomId: room.id,
-            content: message,
+            content: storedMessage.content,
+            id: storedMessage.id,
             type,
           });
         }

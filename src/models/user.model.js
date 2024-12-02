@@ -43,6 +43,9 @@ export const getUserByUsername = async (username) => {
   return await knex(table).select(fields).where("username", username).first();
 };
 
+export const getUserByEmail = async (email) => {
+  return await knex(table).select(fields).where("email", email).first();
+};
 export const getUserById = async (id) => {
   return await knex(table).select(fields).where("id", id).first();
 };
