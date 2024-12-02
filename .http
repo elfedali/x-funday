@@ -1,4 +1,5 @@
 @host=http://localhost:3000
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ3ZWJtYXN0ZXIiLCJpYXQiOjE3MzMxNTg3NzgsImV4cCI6MTczMzI0NTE3OH0.GcP5RnCVKGiQYAMrzttkGnQs5RmUhjs91TStOipqXlY
 ###
 GET {{host}}/
 Content-Type: application/json
@@ -27,3 +28,8 @@ Accept: application/json
     "login"  : "webmaster@prochat.ma",
     "password": "password"
 }
+
+###
+GET {{host}}/u
+Content-Type: application/json
+Authorization: Bearer {{token}}

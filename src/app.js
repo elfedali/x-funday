@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 
 import authRoutes from "./routes/auth.routes.js";
 import indexRoutes from "./routes/index.routes.js";
+import userRoutes from "./routes/user.routes.js";
 // import ApiRoutes from "./routes/api.routes.js";
 // import "./config/passport.js"; // Passport configuration
 
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 
 app.use(indexRoutes);
 app.use(authRoutes);
+app.use(userRoutes);
 // app.use(ApiRoutes);
 
 app.get("*", (req, res) => {
