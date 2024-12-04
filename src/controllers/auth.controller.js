@@ -32,10 +32,10 @@ export const registerUser = async (req, res) => {
     }
 
     // Hash password before storing
-    const hashedPassword = await bcrypt.hash(password, 10);
+    //const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create the user
-    await createUser({ username, email, password: hashedPassword });
+    await createUser({ username, email, password });
     return res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error(error);

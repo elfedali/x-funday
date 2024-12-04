@@ -8,7 +8,7 @@ export const up = function (knex) {
       .createTable("users", function (table) {
         table.increments("id");
         table.string("username").unique().index();
-        table.string("name").nullable();
+        table.string("name").nullable(); // display name
         table.string("email").unique().index();
         table.string("password");
 

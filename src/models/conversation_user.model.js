@@ -1,11 +1,11 @@
-import knex from "../db/knex";
+import knex from "../knex/knex.js";
 
 const table2 = "conversation_users";
 
 const fields2 = [
   "id",
   "conversation_id",
-  "owner_id",
+  "user_id",
   "created_at",
   "updated_at",
 ];
@@ -19,6 +19,7 @@ export const getConversationUserById = async (id) => {
 };
 
 export const createConversationUser = async (props) => {
+  console.log("props", props);
   return await knex(table2).insert(props).returning(fields2);
 };
 
@@ -36,17 +37,6 @@ export const getConversationUserByConversationId = async (conversation_id) => {
     .where("conversation_id", conversation_id);
 };
 
-export const getConversationUserByOwnerId = async (owner_id) => {
-  return await knex(table2).select(fields2).where("owner_id", owner_id);
-};
-
-export const getConversationUserByConversationIdAndOwnerId = async (
-  conversation_id,
-  owner_id
-) => {
-  return await knex(table2)
-    .select(fields2)
-    .where("conversation_id", conversation_id)
-    .andWhere("owner_id", owner_id)
-    .first();
+export const getConversationUserByUserId = async (user_id) => {
+  return await knex(table2).select(fields2).where("user_id", user_id);
 };

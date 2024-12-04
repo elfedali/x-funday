@@ -1,55 +1,154 @@
 @host=http://localhost:3000
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJoZWxsb3giLCJpYXQiOjE3MzMzMTExNjMsImV4cCI6MTczMzM5NzU2M30.-oymLrA9fxRLeKb_tvk4ZhEhLKUu0WPEE12qrWTZyQI
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ3ZWJtYXN0ZXIiLCJpYXQiOjE3MzMzMjM0MzYsImV4cCI6MTczMzQwOTgzNn0.yJnCswVGDQEEXaEdV2ePBZQqhqyZcBX5CoiBEjm2D9M
 ###
 GET {{host}}/
 Content-Type: application/json
 Accept: application/json
 
+### Users Endpoints
+
+# Get all users
+GET {{host}}/u
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
 
 ###
+
+# Get user by ID
+GET {{host}}/u/2
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+# Register a new user
 POST {{host}}/u/r
 Content-Type: application/json
 Accept: application/json
 
 {
-    "username"  : "hello",
-    "email": "hello@mail.ma",
-    "password": "123456",
-    "confirmPassword": "123456"
+    "username": "new_user",
+    "email": "new_user@mail.com",
+    "password": "password123",
+    "confirmPassword": "password123"
 }
 
-
 ###
+
+# Login a user
 POST {{host}}/u/l
 Content-Type: application/json
 Accept: application/json
 
 {
-    "login"  : "hellox",
-    "password": "123456"
+    "login": "webmaster",
+    "password": "password"
 }
 
 ###
-GET {{host}}/u
-Content-Type: application/json
-Authorization: Bearer {{token}}
-###
-GET {{host}}/u/5
-Content-Type: application/json
-Authorization: Bearer {{token}}
 
-###
-PUT {{host}}/u/4
-Content-Type: application/json
+# Update user profile
+PUT {{host}}/u/1
 Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
 
 {
-   "name": "Jone",
-   "bio": "I m a webmaster updated",
-   "avatar": "avatarpng"   
+    "name": "Updated Name",
+    "bio": "Updated bio content",
+    "avatar": "updated_avatar_url"
 }
 
 ###
+
+# Delete user
 DELETE {{host}}/u/5
-Content-Type: application/json
 Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+
+### Conversations Endpoints
+
+# Get all conversations
+GET {{host}}/c
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+# Get conversation by ID
+GET {{host}}/c/2
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+# Create a new conversation
+POST {{host}}/c
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "New Conversation demi",
+    "description": "This is a new group conversation",
+    "avatar": "group_avatar_url",
+    "is_group": true
+}
+
+###
+
+# Update a conversation
+PUT {{host}}/c/3
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "name": "Updated Conversation Name",
+    "description": "Updated description",
+    "avatar": "updated_avatar_url"
+    
+}
+
+###
+
+# Delete a conversation
+DELETE {{host}}/c/3
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+
+### Messages Endpoints
+
+# Get all messages in a conversation
+GET {{host}}/c/3/m
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+# Send a message in a conversation
+POST {{host}}/c/3/m
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+    "content": "Hello, this is a test message!",
+    "type": "text"
+}
+
+###
+
+# Delete a message
+DELETE {{host}}/m/10
+Authorization: Bearer {{token}}
+Content-Type: application/json

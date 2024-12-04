@@ -10,6 +10,7 @@ export const actionGetConnectedUser = async (req, res) => {
 
     // Fetch the user's full details from the database
     const user = await getUserById(userId);
+    console.log("user", user);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
