@@ -1,5 +1,5 @@
 @host=http://localhost:3000
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ3ZWJtYXN0ZXIiLCJpYXQiOjE3MzMxNTg3NzgsImV4cCI6MTczMzI0NTE3OH0.GcP5RnCVKGiQYAMrzttkGnQs5RmUhjs91TStOipqXlY
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJoZWxsb3giLCJpYXQiOjE3MzMzMTExNjMsImV4cCI6MTczMzM5NzU2M30.-oymLrA9fxRLeKb_tvk4ZhEhLKUu0WPEE12qrWTZyQI
 ###
 GET {{host}}/
 Content-Type: application/json
@@ -25,11 +25,31 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "login"  : "webmaster@prochat.ma",
-    "password": "password"
+    "login"  : "hellox",
+    "password": "123456"
 }
 
 ###
 GET {{host}}/u
+Content-Type: application/json
+Authorization: Bearer {{token}}
+###
+GET {{host}}/u/5
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+PUT {{host}}/u/4
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+   "name": "Jone",
+   "bio": "I m a webmaster updated",
+   "avatar": "avatarpng"   
+}
+
+###
+DELETE {{host}}/u/5
 Content-Type: application/json
 Authorization: Bearer {{token}}

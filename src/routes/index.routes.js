@@ -1,12 +1,12 @@
 import { Router } from "express";
+import env from "../helpers/env.js";
 
 const router = Router();
 
 router.get("/", async (req, res) => {
   res.json({
-    message: "Welcome to the chat API",
-    appName: "ProChat API",
-    appVersion: "1.0.0",
+    appName: env.APP_NAME,
+    appVersion: env.APP_VERSION,
     nodeVersion: process.version,
   });
 });
