@@ -10,9 +10,9 @@
     "start": "node dist/server.js",
     "dev": "npm run build && npm start",
     "dev:watch": "nodemon --watch src --ext ts --exec \"npm run dev\"",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+  "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+  "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+  "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
@@ -26,9 +26,14 @@
   "jest": {
     "preset": "ts-jest/presets/default-esm",
     "extensionsToTreatAsEsm": [
-      ".ts"
+      ".ts",
+      ".tsx"
     ],
+    "resolver": "ts-jest-resolver",
     "testEnvironment": "node",
+    "maxWorkers": 1,
+    "forceExit": true,
+    "detectOpenHandles": true,
     "roots": [
       "<rootDir>/src",
       "<rootDir>/tests"
@@ -38,10 +43,11 @@
       "**/?(*.)+(spec|test).ts"
     ],
     "transform": {
-      "^.+\\.ts$": [
+      "^.+\\.(ts|tsx)$": [
         "ts-jest",
         {
-          "useESM": true
+          "useESM": true,
+          "tsconfig": "<rootDir>/tsconfig.json"
         }
       ]
     },
@@ -57,7 +63,14 @@
       "lcov",
       "html"
     ],
-    "moduleNameMapping": {
+    "setupFiles": [
+      "<rootDir>/tests/setup-env.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
     }
   },
@@ -107,6 +120,8 @@
     "nodemon": "^3.0.2",
     "prettier": "^3.6.2",
     "supertest": "^7.0.0",
+    "ts-jest": "^29.4.1",
+    "ts-jest-resolver": "^2.0.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.2"

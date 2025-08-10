@@ -32,7 +32,11 @@ export class AuthController {
       res.status(400).json({
         success: false,
         message: error.message || 'Registration failed',
-        error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        error:
+          process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
+            ? error.stack
+            : undefined,
+        details: process.env.NODE_ENV === 'test' ? error.toString() : undefined,
       });
     }
   }

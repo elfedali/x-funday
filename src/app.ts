@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -53,6 +53,18 @@ if (config.NODE_ENV !== 'test') {
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// JSON parsing error handler
+app.use((error: any, req: Request, res: Response, next: NextFunction): void => {
+  if (error instanceof SyntaxError && 'body' in error) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid JSON syntax',
+    });
+    return;
+  }
+  next(error);
+});
 
 // Rate limiting
 app.use('/api/', apiRateLimiter);

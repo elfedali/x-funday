@@ -26,6 +26,9 @@ export const errorHandler = (
   else if (error.name === 'ValidationError') {
     statusCode = 400;
     message = 'Validation Error';
+  } else if (error.name === 'SyntaxError' && error.message.includes('JSON')) {
+    statusCode = 400;
+    message = 'Invalid JSON syntax';
   } else if (error.name === 'UnauthorizedError') {
     statusCode = 401;
     message = 'Unauthorized';

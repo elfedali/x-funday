@@ -26,7 +26,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "removeComments": false,
+  "removeComments": false,
+  "isolatedModules": true,
     "typeRoots": ["node_modules/@types", "./src/types"],
     "baseUrl": "./src",
     "paths": {
