@@ -1,5 +1,5 @@
 import db from '../knex/knex.js';
-import { Message, MessageType, CreateMessageRequest } from '@/types/index.js';
+import { Message, MessageType, CreateMessageRequest } from '../types/index.js';
 
 const table = 'messages';
 

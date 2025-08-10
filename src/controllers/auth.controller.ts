@@ -1,204 +1,207 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '@/types/index.js';
-import { AuthService } from '@/services/auth.service.js';
+import { AuthService } from '../services/auth.service.js';
 import {
-  createSuccessResponse,
-  createErrorResponse,
-  asyncHandler,
-  AppError,
-} from '@/utils/helpers.js';
-import { logger } from '@/config/logger.js';
+  CreateUserRequest,
+  LoginRequest,
+  UpdateProfileRequest,
+  ChangePasswordRequest,
+} from '../types/index.js';
+import { AuthenticatedRequest } from '../types/index.js';
+import { logger } from '../config/logger.js';
 
-export const registerUser = asyncHandler(async (req: Request, res: Response) => {
-  const { username, email, password, confirmPassword, name } = req.body;
+export class AuthController {
+  static async register(req: Request, res: Response): Promise<void> {
+    try {
+      const userData: CreateUserRequest = req.body;
 
-  try {
-    const result = await AuthService.register({
-      username,
-      email,
-      password,
-      confirmPassword,
-      name,
-    });
+      const result = await AuthService.register(userData);
 
-    logger.info('User registered successfully', {
-      userId: result.user.id,
-      username: result.user.username,
-      ip: req.ip,
-    });
+      logger.info(`New user registered: ${userData.username}`);
 
-    res.status(201).json(
-      createSuccessResponse('User registered successfully', {
-        user: result.user,
-        token: result.token,
-      })
-    );
-  } catch (error) {
-    if (error instanceof AppError) {
-      logger.warn('Registration failed', {
-        error: error.message,
-        username,
-        email,
-        ip: req.ip,
+      res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        data: {
+          user: result.user,
+          token: result.token,
+        },
       });
-      res.status(error.statusCode).json(createErrorResponse(error.message));
-    } else {
+    } catch (error: any) {
       logger.error('Registration error:', error);
-      res.status(500).json(createErrorResponse('Registration failed'));
-    }
-  }
-});
 
-export const loginUser = asyncHandler(async (req: Request, res: Response) => {
-  const { login, password } = req.body;
-
-  try {
-    const result = await AuthService.login({ login, password });
-
-    logger.info('User logged in successfully', {
-      userId: result.user.id,
-      username: result.user.username,
-      ip: req.ip,
-    });
-
-    res.status(200).json(
-      createSuccessResponse('Login successful', {
-        user: result.user,
-        token: result.token,
-      })
-    );
-  } catch (error) {
-    if (error instanceof AppError) {
-      logger.warn('Login failed', {
-        error: error.message,
-        login,
-        ip: req.ip,
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Registration failed',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       });
-      res.status(error.statusCode).json(createErrorResponse(error.message));
-    } else {
+    }
+  }
+
+  static async login(req: Request, res: Response): Promise<void> {
+    try {
+      const loginData: LoginRequest = req.body;
+
+      const result = await AuthService.login(loginData);
+
+      logger.info(`User logged in: ${loginData.login}`);
+
+      res.json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          user: result.user,
+          token: result.token,
+        },
+      });
+    } catch (error: any) {
       logger.error('Login error:', error);
-      res.status(500).json(createErrorResponse('Login failed'));
+
+      res.status(401).json({
+        success: false,
+        message: error.message || 'Login failed',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      });
     }
   }
-});
 
-export const getProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    if (!req.user) {
-      res.status(401).json(createErrorResponse('Authentication required'));
-      return;
+  static async logout(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // In a real application, you might want to blacklist the token
+      // For now, we'll just return a success message
+
+      logger.info(`User logged out: ${req.user?.username}`);
+
+      res.json({
+        success: true,
+        message: 'Logout successful',
+      });
+    } catch (error: any) {
+      logger.error('Logout error:', error);
+
+      res.status(500).json({
+        success: false,
+        message: 'Logout failed',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      });
     }
+  }
 
-    const user = await AuthService.getProfile(req.user.id);
+  static async getProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          message: 'User not authenticated',
+        });
+        return;
+      }
 
-    res.status(200).json(createSuccessResponse('Profile retrieved successfully', { user }));
-  } catch (error) {
-    if (error instanceof AppError) {
-      res.status(error.statusCode).json(createErrorResponse(error.message));
-    } else {
+      const profile = await AuthService.getProfile(req.user.id);
+
+      res.json({
+        success: true,
+        message: 'Profile retrieved successfully',
+        data: { user: profile },
+      });
+    } catch (error: any) {
       logger.error('Get profile error:', error);
-      res.status(500).json(createErrorResponse('Failed to get profile'));
+
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve profile',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      });
     }
   }
-});
 
-export const updateProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    if (!req.user) {
-      res.status(401).json(createErrorResponse('Authentication required'));
-      return;
-    }
+  static async updateProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          message: 'User not authenticated',
+        });
+        return;
+      }
 
-    const { name, bio, avatar } = req.body;
-    const updateData: any = {};
+      const updateData: UpdateProfileRequest = req.body;
 
-    if (name !== undefined) updateData.name = name;
-    if (bio !== undefined) updateData.bio = bio;
-    if (avatar !== undefined) updateData.avatar = avatar;
+      const updatedProfile = await AuthService.updateProfile(req.user.id, updateData);
 
-    const user = await AuthService.updateProfile(req.user.id, updateData);
+      logger.info(`User profile updated: ${req.user.username}`);
 
-    logger.info('Profile updated successfully', {
-      userId: req.user.id,
-      updatedFields: Object.keys(updateData),
-    });
-
-    res.status(200).json(createSuccessResponse('Profile updated successfully', { user }));
-  } catch (error) {
-    if (error instanceof AppError) {
-      res.status(error.statusCode).json(createErrorResponse(error.message));
-    } else {
+      res.json({
+        success: true,
+        message: 'Profile updated successfully',
+        data: { user: updatedProfile },
+      });
+    } catch (error: any) {
       logger.error('Update profile error:', error);
-      res.status(500).json(createErrorResponse('Failed to update profile'));
+
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Failed to update profile',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      });
     }
   }
-});
 
-export const changePassword = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    if (!req.user) {
-      res.status(401).json(createErrorResponse('Authentication required'));
-      return;
-    }
+  static async changePassword(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          message: 'User not authenticated',
+        });
+        return;
+      }
 
-    const { currentPassword, newPassword, confirmPassword } = req.body;
+      const passwordData: ChangePasswordRequest = req.body;
 
-    if (newPassword !== confirmPassword) {
-      res.status(400).json(createErrorResponse('New passwords do not match'));
-      return;
-    }
+      await AuthService.changePassword(req.user.id, passwordData);
 
-    await AuthService.changePassword(req.user.id, currentPassword, newPassword);
+      logger.info(`Password changed for user: ${req.user.username}`);
 
-    logger.info('Password changed successfully', { userId: req.user.id });
-
-    res.status(200).json(createSuccessResponse('Password changed successfully'));
-  } catch (error) {
-    if (error instanceof AppError) {
-      res.status(error.statusCode).json(createErrorResponse(error.message));
-    } else {
+      res.json({
+        success: true,
+        message: 'Password changed successfully',
+      });
+    } catch (error: any) {
       logger.error('Change password error:', error);
-      res.status(500).json(createErrorResponse('Failed to change password'));
+
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Failed to change password',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      });
     }
   }
-});
 
-export const verifyToken = asyncHandler(async (req: Request, res: Response) => {
-  try {
-    const { token } = req.body;
+  static async refreshToken(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          message: 'User not authenticated',
+        });
+        return;
+      }
 
-    if (!token) {
-      res.status(400).json(createErrorResponse('Token is required'));
-      return;
-    }
+      const newToken = await AuthService.refreshToken(req.user.id);
 
-    const user = await AuthService.verifyToken(token);
+      res.json({
+        success: true,
+        message: 'Token refreshed successfully',
+        data: { token: newToken },
+      });
+    } catch (error: any) {
+      logger.error('Refresh token error:', error);
 
-    res.status(200).json(createSuccessResponse('Token is valid', { user }));
-  } catch (error) {
-    if (error instanceof AppError) {
-      res.status(error.statusCode).json(createErrorResponse(error.message));
-    } else {
-      logger.error('Token verification error:', error);
-      res.status(500).json(createErrorResponse('Token verification failed'));
+      res.status(500).json({
+        success: false,
+        message: 'Failed to refresh token',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      });
     }
   }
-});
-
-export const logout = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    if (!req.user) {
-      res.status(401).json(createErrorResponse('Authentication required'));
-      return;
-    }
-
-    // In a more sophisticated setup, you would invalidate the token
-    // For now, we'll just log the logout
-    logger.info('User logged out', { userId: req.user.id });
-
-    res.status(200).json(createSuccessResponse('Logout successful'));
-  } catch (error) {
-    logger.error('Logout error:', error);
-    res.status(500).json(createErrorResponse('Logout failed'));
-  }
-});
+}

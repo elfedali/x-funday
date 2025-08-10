@@ -5,7 +5,7 @@ import {
   ConversationRole,
   CreateConversationRequest,
   UserProfile,
-} from '@/types/index.js';
+} from '../types/index.js';
 
 const conversationTable = 'conversations';
 const conversationUserTable = 'conversation_users';

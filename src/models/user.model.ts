@@ -1,8 +1,10 @@
 import db from '../knex/knex.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import { User, UserProfile } from '@/types/index.js';
-import { config } from '@/config/env.js';
+import { Knex } from 'knex';
+import { v4 as uuidv4 } from 'uuid';
+import { User, UserProfile } from '../types/index.js';
+import { config } from '../config/env.js';
 
 const table = 'users';
 

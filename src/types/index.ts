@@ -52,6 +52,18 @@ export interface UpdateProfileRequest {
   avatar?: string;
 }
 
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface UpdateUserRequest {
+  name?: string;
+  bio?: string;
+  avatar?: string;
+}
+
 // JWT Types
 export interface JwtUser extends JwtPayload {
   id: number;
@@ -99,6 +111,31 @@ export interface CreateMessageRequest {
   reply_to_id?: number;
 }
 
+export interface UpdateMessageRequest {
+  content: string;
+}
+
+export interface MessageQuery {
+  search?: string;
+  conversationId?: number;
+  limit?: number;
+  offset?: number;
+  before?: Date;
+}
+
+export interface UserSearchQuery {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface UserPresence {
+  userId: number;
+  isOnline: boolean;
+  lastSeen: Date;
+  status: 'online' | 'offline' | 'away';
+}
+
 // Conversation Types
 export interface Conversation {
   id: number;
@@ -122,6 +159,7 @@ export interface ConversationUser {
 }
 
 export enum ConversationRole {
+  OWNER = 'owner',
   ADMIN = 'admin',
   MODERATOR = 'moderator',
   MEMBER = 'member',
@@ -132,6 +170,16 @@ export interface CreateConversationRequest {
   description?: string;
   is_group: boolean;
   user_ids?: number[];
+}
+
+export interface UpdateConversationRequest {
+  name?: string;
+  description?: string;
+}
+
+export interface ConversationQuery {
+  limit: number;
+  offset: number;
 }
 
 // Socket Types

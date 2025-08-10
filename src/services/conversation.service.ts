@@ -3,7 +3,7 @@ import {
   CreateConversationRequest,
   ConversationRole,
   UserProfile,
-} from '@/types/index.js';
+} from '../types/index.js';
 import {
   createConversation,
   getUserConversations,
@@ -18,10 +18,10 @@ import {
   searchConversations,
   getDirectConversation,
   getConversationsCount,
-} from '@/models/conversation.model.js';
-import { getUsersByIds } from '@/models/user.model.js';
-import { AppError, calculatePagination } from '@/utils/helpers.js';
-import { logger } from '@/config/logger.js';
+} from '../models/conversation.model.js';
+import { getUsersByIds } from '../models/user.model.js';
+import { AppError, calculatePagination } from '../utils/helpers.js';
+import { logger } from '../config/logger.js';
 
 export class ConversationService {
   static async createConversation(
@@ -89,8 +89,7 @@ export class ConversationService {
 
   static async getUserConversations(
     userId: number,
-    page: number = 1,
-    limit: number = 20
+    query: { limit: number; offset: number }
   ): Promise<{
     conversations: any[];
     pagination: {
@@ -101,10 +100,12 @@ export class ConversationService {
     };
   }> {
     try {
+      const { limit, offset } = query;
       const total = await getConversationsCount(userId);
+      const page = Math.floor(offset / limit) + 1;
       const pagination = calculatePagination(page, limit, total);
 
-      const conversations = await getUserConversations(userId, limit, pagination.offset);
+      const conversations = await getUserConversations(userId, limit, offset);
 
       return {
         conversations,
@@ -116,10 +117,7 @@ export class ConversationService {
     }
   }
 
-  static async getConversationDetails(
-    conversationId: number,
-    userId: number
-  ): Promise<Conversation> {
+  static async getConversationById(conversationId: number, userId: number): Promise<Conversation> {
     try {
       // Verify user is in conversation
       const isUserMember = await isUserInConversation(conversationId, userId);
@@ -144,8 +142,8 @@ export class ConversationService {
 
   static async updateConversation(
     conversationId: number,
-    userId: number,
-    updateData: Partial<Conversation>
+    updateData: Partial<Conversation>,
+    userId: number
   ): Promise<Conversation> {
     try {
       // Verify user has admin role in conversation
@@ -259,10 +257,10 @@ export class ConversationService {
     }
   }
 
-  static async addMember(
+  static async addParticipant(
     conversationId: number,
-    adminUserId: number,
-    newMemberUserId: number
+    userId: number,
+    adminUserId: number
   ): Promise<void> {
     try {
       // Verify admin has permission
@@ -272,17 +270,17 @@ export class ConversationService {
       }
 
       // Check if user is already in conversation
-      const isAlreadyMember = await isUserInConversation(conversationId, newMemberUserId);
+      const isAlreadyMember = await isUserInConversation(conversationId, userId);
       if (isAlreadyMember) {
         throw new AppError('User is already a member of this conversation', 400);
       }
 
-      await addUserToConversation(conversationId, newMemberUserId, ConversationRole.MEMBER);
+      await addUserToConversation(conversationId, userId, ConversationRole.MEMBER);
 
       logger.info('Member added to conversation successfully', {
         conversationId,
         adminUserId,
-        newMemberUserId,
+        userId,
       });
     } catch (error) {
       if (error instanceof AppError) {
@@ -293,7 +291,7 @@ export class ConversationService {
     }
   }
 
-  static async removeMember(
+  static async removeParticipant(
     conversationId: number,
     adminUserId: number,
     memberUserId: number

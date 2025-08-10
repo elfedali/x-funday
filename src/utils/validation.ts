@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { ValidationError } from '@/types/index.js';
+import { ValidationError } from '../types/index.js';
 
 export const userRegistrationSchema = Joi.object({
   username: Joi.string().alphanum().min(3).max(30).required().messages({

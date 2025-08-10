@@ -1,8 +1,8 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction } from 'express';
-import { config } from '@/config/env.js';
-import { createErrorResponse } from '@/utils/helpers.js';
-import { logger } from '@/config/logger.js';
+import { config } from '../config/env.js';
+import { createErrorResponse } from '../utils/helpers.js';
+import { logger } from '../config/logger.js';
 
 // General API rate limiter
 export const apiRateLimiter = rateLimit({

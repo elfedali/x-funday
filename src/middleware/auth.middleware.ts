@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { config } from '@/config/env.js';
-import { AuthenticatedRequest, JwtUser } from '@/types/index.js';
-import { createErrorResponse, AppError } from '@/utils/helpers.js';
-import { logger } from '@/config/logger.js';
+import { config } from '../config/env.js';
+import { AuthenticatedRequest, JwtUser } from '../types/index.js';
+import { createErrorResponse, AppError } from '../utils/helpers.js';
+import { logger } from '../config/logger.js';
 
 export const authMiddleware = (
   req: AuthenticatedRequest,

@@ -1,67 +1,46 @@
 import { Router } from 'express';
+import { AuthController } from '../controllers/auth.controller.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js';
+import { validateRequest } from '../middlewares/validation.middleware.js';
+import { rateLimitMiddleware } from '../middlewares/rateLimit.middleware.js';
 import {
-  registerUser,
-  loginUser,
-  getProfile,
-  updateProfile,
-  changePassword,
-  verifyToken,
-  logout,
-} from '@/controllers/auth.controller.js';
-import { authMiddleware } from '@/middleware/auth.middleware.js';
-import { validationMiddleware } from '@/middleware/validation.middleware.js';
-import { authRateLimiter, passwordResetRateLimiter } from '@/middleware/rateLimiter.middleware.js';
-import {
-  userRegistrationSchema,
-  userLoginSchema,
-  updateProfileSchema,
-} from '@/utils/validation.js';
+  registerValidation,
+  loginValidation,
+  updateProfileValidation,
+  changePasswordValidation,
+} from '../validations/auth.validation.js';
 
 const router = Router();
 
-// Public routes
+// Authentication routes (with rate limiting)
 router.post(
-  '/auth/register',
-  authRateLimiter,
-  validationMiddleware(userRegistrationSchema),
-  registerUser
+  '/register',
+  rateLimitMiddleware,
+  validateRequest(registerValidation),
+  AuthController.register
 );
 
-router.post('/auth/login', authRateLimiter, validationMiddleware(userLoginSchema), loginUser);
+router.post('/login', rateLimitMiddleware, validateRequest(loginValidation), AuthController.login);
 
-router.post(
-  '/auth/verify-token',
-  validationMiddleware({
-    body: {
-      token: 'required|string',
-    },
-  } as any),
-  verifyToken
-);
+router.post('/logout', authMiddleware, AuthController.logout);
 
-// Protected routes
-router.get('/auth/profile', authMiddleware, getProfile);
+router.post('/refresh-token', authMiddleware, AuthController.refreshToken);
+
+// Profile routes (protected)
+router.get('/profile', authMiddleware, AuthController.getProfile);
 
 router.put(
-  '/auth/profile',
+  '/profile',
   authMiddleware,
-  validationMiddleware(updateProfileSchema),
-  updateProfile
+  validateRequest(updateProfileValidation),
+  AuthController.updateProfile
 );
 
-router.post(
-  '/auth/change-password',
+router.put(
+  '/change-password',
   authMiddleware,
-  validationMiddleware({
-    body: {
-      currentPassword: 'required|string',
-      newPassword: 'required|string|min:8',
-      confirmPassword: 'required|string',
-    },
-  } as any),
-  changePassword
+  validateRequest(changePasswordValidation),
+  AuthController.changePassword
 );
-
-router.post('/auth/logout', authMiddleware, logout);
 
 export default router;

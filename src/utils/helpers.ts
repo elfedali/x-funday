@@ -1,4 +1,4 @@
-import { ApiResponse, ValidationError } from '@/types/index.js';
+import { ApiResponse, ValidationError } from '../types/index.js';
 
 export class AppError extends Error {
   public readonly statusCode: number;

@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { config } from '@/config/env.js';
-import { User, CreateUserRequest, LoginRequest, JwtUser, UserProfile } from '@/types/index.js';
+import { config } from '../config/env.js';
+import { User, CreateUserRequest, LoginRequest, JwtUser, UserProfile } from '../types/index.js';
 import {
   AppError,
   generateVerificationToken,
@@ -9,7 +9,7 @@ import {
   isValidUsername,
   isValidPassword,
   sanitizeUser,
-} from '@/utils/helpers.js';
+} from '../utils/helpers.js';
 import {
   getUserByUsername,
   getUserByEmail,
@@ -17,7 +17,7 @@ import {
   getUserById,
   updateUser,
 } from '../models/user.model.js';
-import { logger } from '@/config/logger.js';
+import { logger } from '../config/logger.js';
 
 export class AuthService {
   static async register(
@@ -249,9 +249,10 @@ export class AuthService {
 
   static async changePassword(
     userId: number,
-    currentPassword: string,
-    newPassword: string
+    passwordData: { currentPassword: string; newPassword: string }
   ): Promise<void> {
+    const { currentPassword, newPassword } = passwordData;
+
     try {
       const user = await getUserById(userId);
 
@@ -286,6 +287,29 @@ export class AuthService {
       }
       logger.error('Change password error:', error);
       throw new AppError('Failed to change password', 500);
+    }
+  }
+
+  static async refreshToken(userId: number): Promise<string> {
+    try {
+      const user = await getUserById(userId);
+
+      if (!user || !user.is_active) {
+        throw new AppError('Invalid user', 401);
+      }
+
+      // Generate new token
+      const token = this.generateAccessToken(user);
+
+      logger.info('Token refreshed successfully', { userId });
+
+      return token;
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      logger.error('Refresh token error:', error);
+      throw new AppError('Failed to refresh token', 500);
     }
   }
 }

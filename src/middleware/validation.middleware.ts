@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { ObjectSchema } from 'joi';
-import { createErrorResponse, AppError } from '@/utils/helpers.js';
-import { validateRequest } from '@/utils/validation.js';
-import { logger } from '@/config/logger.js';
+import { createErrorResponse, AppError } from '../utils/helpers.js';
+import { validateRequest } from '../utils/validation.js';
+import { logger } from '../config/logger.js';
 
 export const validationMiddleware = (
   schema: ObjectSchema,
