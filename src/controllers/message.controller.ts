@@ -215,25 +215,30 @@ export class MessageController {
         return;
       }
 
-      const query: MessageQuery = {
-        search: req.query['search'] as string as string,
-        conversationId: (req.query['conversationId'] as string)
-          ? parseInt(req.query['conversationId'] as string as string)
-          : undefined,
-        limit: parseInt(req.query['limit'] as string as string) || 20,
-        offset: parseInt(req.query['offset'] as string as string) || 0,
-      };
+      const search = (req.query['search'] as string) || '';
+      const conversationId = (req.query['conversationId'] as string)
+        ? parseInt(req.query['conversationId'] as string)
+        : undefined;
+      const limit = parseInt(req.query['limit'] as string) || 20;
+      const offset = parseInt(req.query['offset'] as string) || 0;
+      const page = Math.floor(offset / limit) + 1;
 
-      const result = await MessageService.searchMessages(req.user.id, query);
+      const result = await MessageService.searchMessages(
+        search,
+        req.user.id,
+        conversationId,
+        page,
+        limit
+      );
 
       res.json({
         success: true,
         message: 'Messages retrieved successfully',
         data: {
           messages: result.messages,
-          total: result.total,
-          limit: query.limit,
-          offset: query.offset,
+          total: result.pagination.total,
+          limit,
+          offset,
         },
       });
     } catch (error: any) {

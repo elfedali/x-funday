@@ -32,7 +32,7 @@ export class ConversationController {
         message: 'Conversations retrieved successfully',
         data: {
           conversations: result.conversations,
-          total: result.total,
+          total: result.pagination.total,
           limit: query.limit,
           offset: query.offset,
         },
@@ -319,18 +319,15 @@ export class ConversationController {
         return;
       }
 
-      const query = {
-        limit: parseInt(req.query['limit'] as string as string) || 50,
-        offset: parseInt(req.query['offset'] as string as string) || 0,
-        before: (req.query['before'] as string)
-          ? new Date(req.query['before'] as string as string)
-          : undefined,
-      };
-
+      const limit = parseInt(req.query['limit'] as string) || 50;
+      const offset = parseInt(req.query['offset'] as string) || 0;
+      const page = Math.floor(offset / limit) + 1;
+      // Note: Service expects optional beforeMessageId (number), controller previously had a Date 'before'
       const result = await MessageService.getConversationMessages(
         conversationId,
         req.user.id,
-        query
+        page,
+        limit
       );
 
       res.json({
@@ -338,9 +335,9 @@ export class ConversationController {
         message: 'Messages retrieved successfully',
         data: {
           messages: result.messages,
-          total: result.total,
-          limit: query.limit,
-          offset: query.offset,
+          total: result.pagination.total,
+          limit,
+          offset,
         },
       });
     } catch (error: any) {

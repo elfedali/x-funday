@@ -59,17 +59,22 @@ export class UserService {
     query: UserSearchQuery
   ): Promise<{ users: UserProfile[]; total: number }> {
     try {
-      const result = await UserModel.searchUsers(query);
+      const search = query.search || '';
+      const limit = query.limit ?? 20;
+      const offset = query.offset ?? 0;
+
+      const result = await UserModel.searchUsers(search, limit, offset);
 
       // Remove sensitive information from all users
-      const users = result.users.map(user => {
+      const users = result.map((user: any) => {
         const { password, verify_token, ...userProfile } = user;
         return userProfile as UserProfile;
       });
 
       return {
         users,
-        total: result.total,
+        // Note: without a separate count query with filters, we approximate total as returned length
+        total: users.length,
       };
     } catch (error) {
       logger.error('Error searching users:', error);

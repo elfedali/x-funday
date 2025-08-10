@@ -50,7 +50,10 @@ export const setupChatSockets = (io: SocketServer): void => {
 
       // Get user's conversations and join those rooms
       try {
-        const { conversations } = await ConversationService.getUserConversations(user.id, 1, 100);
+        const { conversations } = await ConversationService.getUserConversations(user.id, {
+          limit: 100,
+          offset: 0,
+        });
         for (const conversation of conversations) {
           socket.join(`conversation:${conversation.id}`);
         }
@@ -138,7 +141,7 @@ export const setupChatSockets = (io: SocketServer): void => {
       socket.on('join_conversation', async (data: { conversation_id: number }) => {
         try {
           // Verify user can access this conversation
-          await ConversationService.getConversationDetails(data.conversation_id, user.id);
+          await ConversationService.getConversationById(data.conversation_id, user.id);
 
           socket.join(`conversation:${data.conversation_id}`);
 
